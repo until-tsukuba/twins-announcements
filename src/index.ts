@@ -4,6 +4,7 @@ import { fetchDetailPage } from "./fetchDetailPage.js";
 import { parseDetailPage } from "./parseDetailPage.js";
 import { mkdir, writeFile } from "node:fs/promises";
 import { fetchAttachments } from "./fetchAttachments.js";
+import { detectNewItems } from "./fetchDiffDetect.js";
 
 const mapSeries = async <T, R>(items: readonly T[], fn: (item: T) => Promise<R>): Promise<R[]> => {
     // 並列でやるとアクセスしすぎなので
@@ -23,9 +24,12 @@ const main = async () => {
     // Parse the announcement page
     const parsedIndexPage = parseIndexPage(indexHtml);
 
-    console.log(parsedIndexPage);
+    // Detect new items by comparing with existing output.json
+    const { newItems, existingData } = await detectNewItems(parsedIndexPage, "output/output.json");
 
-    const result = await mapSeries(parsedIndexPage, async (page) => {
+    console.log(`Total items: ${parsedIndexPage.length}, New items: ${newItems.length}, Existing items: ${existingData.length}`);
+
+    const newResults = await mapSeries(newItems, async (page) => {
         const { response, cookies } = await fetchDetailPage(page.id.keijitype, page.id.genrecd, page.id.seqNo);
         const parsedDetailPage = parseDetailPage(response);
 
@@ -65,7 +69,10 @@ const main = async () => {
         };
     });
 
-    console.log(result);
+    // Merge existing data with new results (existing first, new last)
+    const result = [...existingData, ...newResults];
+
+    console.log(`Final output: ${result.length} items`);
 
     writeFile("output/output.json", JSON.stringify(result, null, 2));
 };
