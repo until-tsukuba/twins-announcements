@@ -1,5 +1,4 @@
 dist
+output
 node_modules
 .env
-attachments
-output.json

@@ -16,7 +16,7 @@ const mapSeries = async <T, R>(items: readonly T[], fn: (item: T) => Promise<R>)
 };
 
 const main = async () => {
-    await mkdir("attachments")
+    await mkdir("output/attachments", { recursive: true })
     // Fetch the announcement page
     const indexHtml = await fetchIndexPage();
 
@@ -38,7 +38,7 @@ const main = async () => {
                 attachment.items.map(async (item) => {
                     const body = await fetchAttachments(item.url, cookies);
 
-                    const filePath = `attachments/${Buffer.from(crypto.getRandomValues(new Uint8Array(16)))
+                    const filePath = `output/attachments/${Buffer.from(crypto.getRandomValues(new Uint8Array(16)))
                         .toString("hex")
                         .slice(0, 8)}-${item.title.replace(/\//g, "_")}`;
                     await writeFile(filePath, Buffer.from(body));
@@ -67,7 +67,7 @@ const main = async () => {
 
     console.log(result);
 
-    writeFile("output.json", JSON.stringify(result, null, 2));
+    writeFile("output/output.json", JSON.stringify(result, null, 2));
 };
 
 main();
