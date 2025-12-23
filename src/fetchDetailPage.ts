@@ -18,8 +18,8 @@ const generateUrl = (keijitype: number, genrecd: number, seqNo: number): string 
 const parseCookie = (cookies: readonly string[]) => {
     const map = new Map(
         cookies.map((c) => {
-            const p = c.split(";")[ 0 ]?.trim().split("=");
-            return [ p?.[ 0 ] ?? "", p?.[ 1 ] ?? "" ];
+            const p = c.split(";")[0]?.trim().split("=");
+            return [p?.[0] ?? "", p?.[1] ?? ""];
         }),
     );
 
@@ -30,7 +30,7 @@ export const stringifyCookie = (cookies: Map<string, string> | null): string => 
     if (!cookies) {
         return "";
     }
-    return [ ...cookies.entries() ].map(([ key, value ]) => `${key}=${value}`).join("; ");
+    return [...cookies.entries()].map(([key, value]) => `${key}=${value}`).join("; ");
 };
 
 export const fetchDetailPage = async (keijitype: number, genrecd: number, seqNo: number) => {
@@ -50,14 +50,14 @@ export const fetchDetailPage = async (keijitype: number, genrecd: number, seqNo:
     if (!redirectURL) {
         throw new Error("No redirect URL found");
     }
-    
+
     const response = await fetch(new URL(redirectURL, hostname), {
         method: "GET",
         headers: {
             "User-Agent": userAgent,
-            "Cookie": stringifyCookie(cookies),
+            Cookie: stringifyCookie(cookies),
         },
     }).then((res) => res.text());
 
-    return response;
+    return { response, cookies };
 };

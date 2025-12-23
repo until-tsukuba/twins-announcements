@@ -38,7 +38,7 @@ const visit = (node: parse5.DefaultTreeAdapterTypes.Node, visitor: (node: parse5
 };
 
 export const parseIndexPage = (htmlString: string) => {
-    const parsed = parse5.parseFragment(htmlString);
+    const parsed = parse5.parse(htmlString);
 
     let targetElem: parse5.DefaultTreeAdapterTypes.Element | null = null;
     visit(parsed, (node) => {
