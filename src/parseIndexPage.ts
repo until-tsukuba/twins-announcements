@@ -1,31 +1,5 @@
 import * as parse5 from "parse5";
-import { parseDateString } from "./parseUtil.js";
-
-function isElement(node: parse5.DefaultTreeAdapterTypes.Node | undefined): node is parse5.DefaultTreeAdapterTypes.Element {
-    return node !== undefined && "tagName" in node;
-}
-
-function assertElement(node: parse5.DefaultTreeAdapterTypes.Node | undefined): asserts node is parse5.DefaultTreeAdapterTypes.Element {
-    if (!isElement(node)) {
-        throw new Error("Node is not an element");
-    }
-}
-
-function assertBrElement(node: parse5.DefaultTreeAdapterTypes.Node | undefined): asserts node is parse5.DefaultTreeAdapterTypes.Element {
-    assertElement(node);
-    if (node.tagName !== "br") {
-        throw new Error(`Invalid br element: expected br, got ${node.tagName}`);
-    }
-}
-
-function assertTextNode(node: parse5.DefaultTreeAdapterTypes.ChildNode | undefined): asserts node is parse5.DefaultTreeAdapterTypes.TextNode {
-    if (!node) {
-        throw new Error(`Invalid text node: expected text, got undefined`);
-    }
-    if (node.nodeName !== "#text") {
-        throw new Error(`Invalid text node: expected text, got ${node?.nodeName}`);
-    }
-}
+import { assertBrElement, assertElement, assertTextNode, isElement, parseDateString, pickTag } from "./parseUtil.js";
 
 const visit = (node: parse5.DefaultTreeAdapterTypes.Node, visitor: (node: parse5.DefaultTreeAdapterTypes.Node) => boolean) => {
     const visitChild = visitor(node);
@@ -59,24 +33,14 @@ export const parseIndexPage = (htmlString: string) => {
 
     const div: parse5.DefaultTreeAdapterTypes.Element = targetElem;
 
-    const table = div.childNodes.filter(isElement)[0];
-    if (!table) {
-        throw new Error("No keiji-portlet element found");
-    }
+    const table = pickTag(div, "table");
 
-    const tbody = table.childNodes.filter(isElement)[0];
-    if (!tbody) {
-        throw new Error("No table element found");
-    }
+    const tbody = pickTag(table, "tbody");
 
     const trList = tbody.childNodes.filter(isElement);
 
     const records = trList.map((tr) => {
-        const td = tr.childNodes.filter(isElement)[0];
-
-        if (!td) {
-            throw new Error("No tr element found");
-        }
+        const td = pickTag(tr, "td");
 
         if (td.childNodes.length < 7) {
             throw new Error("td element has insufficient child nodes");
