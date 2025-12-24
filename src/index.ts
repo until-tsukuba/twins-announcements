@@ -2,7 +2,7 @@ import { parseIndexPage } from "./parseIndexPage.js";
 import { fetchIndexPage } from "./fetchIndexPage.js";
 import { fetchDetailPage } from "./fetchDetailPage.js";
 import { parseDetailPage } from "./parseDetailPage.js";
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, writeFile, copyFile } from "node:fs/promises";
 import { fetchAttachments } from "./fetchAttachments.js";
 import { detectNewItems } from "./fetchDiffDetect.js";
 import { generateUrl } from "./generateUrl.js";
@@ -95,6 +95,7 @@ const main = async () => {
         writeFile("output/rss.xml", rssContent),
         writeFile("output/atom.xml", atomContent),
         writeFile("output/feed.json", jsonFeedContent),
+        copyFile("public/index.html", "output/index.html"),
     ]);
 
     console.log("RSS feeds generated successfully!");

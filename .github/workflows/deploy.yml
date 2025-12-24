@@ -1,0 +1,76 @@
+name: Build and Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - master
+  schedule:
+    # 1時間に1回実行（毎時0分）
+    - cron: '0 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Create .env file
+        run: |
+          echo "TWINS_HOSTNAME=${{ secrets.TWINS_HOSTNAME || 'https://twins.tsukuba.ac.jp' }}" >> .env
+          echo "TWINS_USER_AGENT=${{ secrets.TWINS_USER_AGENT || 'twins-announcements' }}" >> .env
+
+      - name: Build
+        run: npm run build
+
+      - name: Fetch announcements
+        run: npm run start
+
+      - name: Prepare files for deployment
+        run: |
+          mkdir -p public-output
+          cp output/output.json public-output/
+          cp output/rss.xml public-output/
+          cp output/atom.xml public-output/
+          cp output/feed.json public-output/
+          cp output/index.html public-output/
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './public-output'
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
