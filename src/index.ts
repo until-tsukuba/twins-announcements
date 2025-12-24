@@ -6,6 +6,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { fetchAttachments } from "./fetchAttachments.js";
 import { detectNewItems } from "./fetchDiffDetect.js";
 import { generateUrl } from "./generateUrl.js";
+import { hostname } from "./envs.js";
 
 const mapSeries = async <T, R>(items: readonly T[], fn: (item: T) => Promise<R>): Promise<R[]> => {
     // 並列でやるとアクセスしすぎなので
@@ -43,9 +44,13 @@ const main = async () => {
                 attachment.items.map(async (item) => {
                     const body = await fetchAttachments(item.url, cookies);
 
-                    const filePath = `output/attachments/${Buffer.from(crypto.getRandomValues(new Uint8Array(16)))
-                        .toString("hex")
-                        .slice(0, 8)}-${item.title.replace(/\//g, "_")}`;
+                    const params = new URL(item.url, `${hostname}/campusweb/`).searchParams;
+                    const index = params.get("index");
+                    if (!index) {
+                        throw new Error("No index param found in attachment URL");
+                    }
+
+                    const filePath = `output/attachments/${page.id.keijitype}-${page.id.genrecd}-${page.id.seqNo}-${index}-${item.title.replace(/\//g, "_")}`;
                     await writeFile(filePath, Buffer.from(body));
 
                     return {
