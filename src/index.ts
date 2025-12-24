@@ -5,6 +5,7 @@ import { parseDetailPage } from "./parseDetailPage.js";
 import { mkdir, writeFile } from "node:fs/promises";
 import { fetchAttachments } from "./fetchAttachments.js";
 import { detectNewItems } from "./fetchDiffDetect.js";
+import { generateUrl } from "./generateUrl.js";
 
 const mapSeries = async <T, R>(items: readonly T[], fn: (item: T) => Promise<R>): Promise<R[]> => {
     // 並列でやるとアクセスしすぎなので
@@ -17,7 +18,7 @@ const mapSeries = async <T, R>(items: readonly T[], fn: (item: T) => Promise<R>)
 };
 
 const main = async () => {
-    await mkdir("output/attachments", { recursive: true })
+    await mkdir("output/attachments", { recursive: true });
     // Fetch the announcement page
     const indexHtml = await fetchIndexPage();
 
@@ -66,6 +67,7 @@ const main = async () => {
                 ...parsedDetailPage,
                 attachments: solvedAttachments,
             },
+            url: generateUrl(page.id.keijitype, page.id.genrecd, page.id.seqNo),
         };
     });
 
