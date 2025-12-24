@@ -8,13 +8,27 @@ export type IndexPageItem = {
     date: string;
 };
 
+type AttachmentBase = {
+    items: { title: string; url: string }[];
+};
+
+export type FileAttachment = AttachmentBase & {
+    type: "file";
+};
+
+export type UrlAttachment = AttachmentBase & {
+    type: "url";
+};
+
+export type Attachment = FileAttachment | UrlAttachment;
+
 export type ParsedDetailPage = {
     title: {
         text: string;
         date: string;
     };
     contents: string;
-    attachments: unknown[];
+    attachments: Attachment[];
     footer: {
         affiliation: string;
         subAffiliation?: string;

@@ -23,10 +23,10 @@ export const detectNewItems = async (
 
     // 既存データを読み込む
     const existingDataRaw = await readFile(outputPath, "utf-8");
-    const existingDataParsed = JSON.parse(existingDataRaw);
+    const existingDataParsed = JSON.parse(existingDataRaw) as OutputItem[];
 
     // 既存データにurlフィールドがない場合は補完
-    const existingData: OutputItem[] = existingDataParsed.map((item: any) => {
+    const existingData: OutputItem[] = existingDataParsed.map((item) => {
         if (!item.url) {
             const { keijitype, genrecd, seqNo } = item.page.id;
             item.url = generateUrl(keijitype, genrecd, seqNo);

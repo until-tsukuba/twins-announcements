@@ -7,6 +7,7 @@ import { fetchAttachments } from "./fetchAttachments.js";
 import { detectNewItems } from "./fetchDiffDetect.js";
 import { generateUrl } from "./generateUrl.js";
 import { generateRSS, generateAtom, generateJSONFeed } from "./generateFeeds.js";
+import type { Attachment } from "./types.js";
 
 const mapSeries = async <T, R>(items: readonly T[], fn: (item: T) => Promise<R>): Promise<R[]> => {
     // 並列でやるとアクセスしすぎなので
@@ -35,9 +36,9 @@ const main = async () => {
         const { response, cookies } = await fetchDetailPage(page.id.keijitype, page.id.genrecd, page.id.seqNo);
         const parsedDetailPage = parseDetailPage(response);
 
-        const solvedAttachments = await mapSeries(parsedDetailPage.attachments, async (attachment) => {
+        const solvedAttachments: Attachment[] = await mapSeries(parsedDetailPage.attachments, async (attachment) => {
             if (attachment.type === "url") {
-                return attachment;
+                return attachment as Attachment;
             }
 
             const solvedItems = await Promise.all(
@@ -57,7 +58,7 @@ const main = async () => {
             );
 
             return {
-                type: attachment.type,
+                type: "file" as const,
                 items: solvedItems,
             };
         });

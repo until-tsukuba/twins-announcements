@@ -1,5 +1,5 @@
 import { hostname } from "./envs.js";
-import type { OutputItem } from "./types.js";
+import type { OutputItem, Attachment } from "./types.js";
 
 // フィード共通情報
 const FEED_TITLE = "筑波大学TWINS 在学生へのお知らせ";
@@ -23,14 +23,14 @@ const buildContent = (item: OutputItem): string => {
         : footer.affiliation;
 
     // 添付ファイル情報を構築
-    const fileAttachments = attachments.filter((att: any) => att.type === "file");
-    const urlAttachments = attachments.filter((att: any) => att.type === "url");
+    const fileAttachments = attachments.filter((att: Attachment): att is Extract<Attachment, { type: "file" }> => att.type === "file");
+    const urlAttachments = attachments.filter((att: Attachment): att is Extract<Attachment, { type: "url" }> => att.type === "url");
 
     let attachmentSection = "";
 
     if (fileAttachments.length > 0) {
         const fileList = fileAttachments
-            .flatMap((att: any) => att.items.map((item: any) => item.title))
+            .flatMap((att) => att.items.map((item) => item.title))
             .map((title: string, index: number) => `  ${index + 1}. ${title}`)
             .join("\n");
         attachmentSection += `\n【添付ファイル】\n${fileList}`;
@@ -40,7 +40,7 @@ const buildContent = (item: OutputItem): string => {
 
     if (urlAttachments.length > 0) {
         const urlList = urlAttachments
-            .flatMap((att: any) => att.items.map((item: any) => item.url))
+            .flatMap((att) => att.items.map((item) => item.url))
             .map((url: string, index: number) => `  ${index + 1}. ${url}`)
             .join("\n");
         attachmentSection += `\n【添付URL】\n${urlList}`;
