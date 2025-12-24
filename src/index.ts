@@ -6,6 +6,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { fetchAttachments } from "./fetchAttachments.js";
 import { detectNewItems } from "./fetchDiffDetect.js";
 import { generateUrl } from "./generateUrl.js";
+import { generateRSS, generateAtom, generateJSONFeed } from "./generateFeeds.js";
 
 const mapSeries = async <T, R>(items: readonly T[], fn: (item: T) => Promise<R>): Promise<R[]> => {
     // 並列でやるとアクセスしすぎなので
@@ -76,7 +77,21 @@ const main = async () => {
 
     console.log(`Final output: ${result.length} items`);
 
-    writeFile("output/output.json", JSON.stringify(result, null, 2));
+    await writeFile("output/output.json", JSON.stringify(result, null, 2));
+
+    // Generate RSS feeds
+    console.log("Generating RSS feeds...");
+    const rssContent = generateRSS(result);
+    const atomContent = generateAtom(result);
+    const jsonFeedContent = generateJSONFeed(result);
+
+    await Promise.all([
+        writeFile("output/rss.xml", rssContent),
+        writeFile("output/atom.xml", atomContent),
+        writeFile("output/feed.json", jsonFeedContent),
+    ]);
+
+    console.log("RSS feeds generated successfully!");
 };
 
 main();
