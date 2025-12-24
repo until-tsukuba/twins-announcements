@@ -42,6 +42,7 @@ jobs:
       
       - name: Download latest results
         run: |
+            mkdir -p output
             curl -o output/output.json https://until.tsukuba.dev/twins-announcements/output.json
 
       - name: Build
