@@ -1,4 +1,5 @@
 import * as parse5 from "parse5";
+import { parseDateString } from "./parseUtil.js";
 
 function isElement(node: parse5.DefaultTreeAdapterTypes.Node | undefined): node is parse5.DefaultTreeAdapterTypes.Element {
     return node !== undefined && "tagName" in node;
@@ -130,7 +131,7 @@ export const parseIndexPage = (htmlString: string) => {
         const dateTextNode = dateText;
         assertTextNode(dateTextNode);
 
-        const date = dateTextNode.value.trim();
+        const date = parseDateString(dateTextNode.value.trim());
 
         return {
             title: titleText.trim(),

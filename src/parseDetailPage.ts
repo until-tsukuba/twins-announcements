@@ -1,4 +1,5 @@
 import * as parse5 from "parse5";
+import { parseDateString, parsePeriodString } from "./parseUtil.js";
 
 function isElement(node: parse5.DefaultTreeAdapterTypes.Node | undefined): node is parse5.DefaultTreeAdapterTypes.Element {
     return node !== undefined && "tagName" in node;
@@ -115,6 +116,7 @@ export const parseDetailPage = (htmlString: string) => {
     if (!titleText || !dateText) {
         throw new Error("Title or date text is empty");
     }
+    const date = parseDateString(dateText);
 
     // contents
 
@@ -210,20 +212,21 @@ export const parseDetailPage = (htmlString: string) => {
     }
     const subAffiliation = footerSecond[0]?.trim();
     const periodLabel = footerSecond[1]?.trim();
-    const period = footerText[2]?.trim();
+    const periodText = footerText[2]?.trim();
 
-    if (!affiliation || !subAffiliation || !periodLabel || !period) {
+    if (!affiliation || !subAffiliation || !periodLabel || !periodText) {
         throw new Error("Footer text parts are empty");
     }
 
     if (periodLabel !== "掲示期間") {
         throw new Error("Invalid period label");
     }
+    const period = parsePeriodString(periodText);
 
     return {
         title: {
             text: titleText,
-            date: dateText,
+            date: date,
         },
         contents: contents,
         attachments: attachments,
