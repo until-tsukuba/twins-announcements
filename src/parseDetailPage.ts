@@ -1,4 +1,5 @@
 import * as parse5 from "parse5";
+import { DateFormat } from "./types.js";
 
 function isElement(node: parse5.DefaultTreeAdapterTypes.Node | undefined): node is parse5.DefaultTreeAdapterTypes.Element {
     return node !== undefined && "tagName" in node;
@@ -89,6 +90,29 @@ const getAllTextContent = (node: parse5.DefaultTreeAdapterTypes.Element): string
     return text;
 };
 
+const parseDateString = (dateString: string): DateFormat => {
+    // 2025/12/04
+    const match = dateString.match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/);
+    if (!match || !match[1] || !match[2] || !match[3]) {
+        throw new Error(`Invalid date string format: ${dateString}`);
+    }
+    const year = +match[1];
+    const month = +match[2];
+    const day = +match[3];
+    return { year, month, day };
+};
+
+const parsePeriodString = (periodString: string): { start: DateFormat; end: DateFormat } => {
+    // "2025/12/23 - 2026/1/23"
+    const term = periodString.split(" - ");
+    if (!term[0] || !term[1]) {
+        throw new Error(`Invalid period string format: ${periodString}`);
+    }
+    const start = parseDateString(term[0]);
+    const end = parseDateString(term[1]);
+    return { start, end };
+};
+
 export const parseDetailPage = (htmlString: string) => {
     const parsed = parse5.parse(htmlString);
 
@@ -115,6 +139,7 @@ export const parseDetailPage = (htmlString: string) => {
     if (!titleText || !dateText) {
         throw new Error("Title or date text is empty");
     }
+    const date = parseDateString(dateText);
 
     // contents
 
@@ -210,20 +235,21 @@ export const parseDetailPage = (htmlString: string) => {
     }
     const subAffiliation = footerSecond[0]?.trim();
     const periodLabel = footerSecond[1]?.trim();
-    const period = footerText[2]?.trim();
+    const periodText = footerText[2]?.trim();
 
-    if (!affiliation || !subAffiliation || !periodLabel || !period) {
+    if (!affiliation || !subAffiliation || !periodLabel || !periodText) {
         throw new Error("Footer text parts are empty");
     }
 
     if (periodLabel !== "掲示期間") {
         throw new Error("Invalid period label");
     }
+    const period = parsePeriodString(periodText);
 
     return {
         title: {
             text: titleText,
-            date: dateText,
+            date: date,
         },
         contents: contents,
         attachments: attachments,
