@@ -6,6 +6,8 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { fetchAttachments } from "./fetchAttachments.js";
 import { detectNewItems } from "./fetchDiffDetect.js";
 import { generateUrl } from "./generateUrl.js";
+import { generateRSS, generateAtom, generateJSONFeed } from "./generateFeeds.js";
+import type { Attachment } from "./types.js";
 
 const mapSeries = async <T, R>(items: readonly T[], fn: (item: T) => Promise<R>): Promise<R[]> => {
     // 並列でやるとアクセスしすぎなので
@@ -34,9 +36,9 @@ const main = async () => {
         const { response, cookies } = await fetchDetailPage(page.id.keijitype, page.id.genrecd, page.id.seqNo);
         const parsedDetailPage = parseDetailPage(response);
 
-        const solvedAttachments = await mapSeries(parsedDetailPage.attachments, async (attachment) => {
+        const solvedAttachments: Attachment[] = await mapSeries(parsedDetailPage.attachments, async (attachment) => {
             if (attachment.type === "url") {
-                return attachment;
+                return attachment as Attachment;
             }
 
             const solvedItems = await Promise.all(
@@ -56,7 +58,7 @@ const main = async () => {
             );
 
             return {
-                type: attachment.type,
+                type: "file" as const,
                 items: solvedItems,
             };
         });
@@ -76,7 +78,21 @@ const main = async () => {
 
     console.log(`Final output: ${result.length} items`);
 
-    writeFile("output/output.json", JSON.stringify(result, null, 2));
+    await writeFile("output/output.json", JSON.stringify(result, null, 2));
+
+    // Generate RSS feeds
+    console.log("Generating RSS feeds...");
+    const rssContent = generateRSS(result);
+    const atomContent = generateAtom(result);
+    const jsonFeedContent = generateJSONFeed(result);
+
+    await Promise.all([
+        writeFile("output/rss.xml", rssContent),
+        writeFile("output/atom.xml", atomContent),
+        writeFile("output/feed.json", jsonFeedContent),
+    ]);
+
+    console.log("RSS feeds generated successfully!");
 };
 
 main();
