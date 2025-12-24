@@ -42,7 +42,13 @@ jobs:
       
       - name: Download latest results
         run: |
-            curl -o output/output.json https://until.tsukuba.dev/twins-announcements/output.json
+          mkdir -p output
+          if curl -f -s -o output/output.json https://until.tsukuba.dev/twins-announcements/output.json; then
+            echo "既存の output.json を正しくダウンロードすることに成功しました"
+          else
+            echo "既存の output.json をダウンロード出来ませんでした"
+          fi
+        continue-on-error: true
 
       - name: Build
         run: npm run build
