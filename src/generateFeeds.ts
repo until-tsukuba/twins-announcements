@@ -71,13 +71,14 @@ export const generateRSS = (items: OutputItem[]): string => { // RSS 2.0
             const link = escapeXml(item.url);
             const description = escapeXml(buildContent(item));
             const guid = escapeXml(generateId(item));
+            const pubDate = new Date(item.updated).toUTCString();
 
             return `    <item>
       <title>${title}</title>
       <link>${link}</link>
       <description>${description}</description>
       <guid isPermaLink="false">${guid}</guid>
-      <pubDate>${lastBuildDate}</pubDate>
+      <pubDate>${pubDate}</pubDate>
     </item>`;
         })
         .join("\n");
@@ -108,13 +109,14 @@ export const generateAtom = (items: OutputItem[]): string => { // Atom
             const content = escapeXml(buildContent(item));
             const id = escapeXml(generateId(item));
             const published = toISODate(item.page.date);
+            const entryUpdated = item.updated;
 
             return `  <entry>
     <title>${title}</title>
     <link href="${link}" />
     <id>${id}</id>
     <published>${published}</published>
-    <updated>${updated}</updated>
+    <updated>${entryUpdated}</updated>
     <content type="text">${content}</content>
   </entry>`;
         })
@@ -146,7 +148,7 @@ export const generateJSONFeed = (items: OutputItem[]): string => { // JSON feed
             url: item.url,
             title: item.page.title,
             content_text: buildContent(item),
-            date_published: toISODate(item.page.date),
+            date_published: item.updated,
         })),
     };
 

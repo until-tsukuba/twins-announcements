@@ -31,6 +31,9 @@ export const detectNewItems = async (
             const { keijitype, genrecd, seqNo } = item.page.id;
             item.url = generateUrl(keijitype, genrecd, seqNo);
         }
+        if (!item.updated) {
+            item.updated = new Date(item.page.date).toISOString();
+        }
         return item;
     });
 

@@ -43,4 +43,5 @@ export type OutputItem = {
     page: IndexPageItem;
     parsedDetailPage: ParsedDetailPage;
     url: string;
+    updated: string;
 };
