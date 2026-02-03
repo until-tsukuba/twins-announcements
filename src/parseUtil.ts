@@ -100,3 +100,31 @@ export const getAllTextContent = (node: parse5.DefaultTreeAdapterTypes.Element):
     }
     return text;
 };
+
+/**
+ * Convert a date string in JST to an ISO 8601 timestamp in UTC.
+ * The input date is in format "YYYY-MM-DD" and represents a date in Japan Standard Time (JST, UTC+9).
+ * The function interprets this as midnight JST and converts it to UTC.
+ * For example, "2025-12-04" (midnight JST on Dec 4) becomes "2025-12-03T15:00:00.000Z" (15:00 UTC on Dec 3).
+ */
+export const dateStringJSTToUTC = (dateString: string): string => {
+    // dateString is in format "YYYY-MM-DD" and represents a date in JST (UTC+9)
+    // Parse the date components
+    const match = dateString.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!match || !match[1] || !match[2] || !match[3]) {
+        throw new Error(`Invalid date string format: ${dateString}`);
+    }
+    
+    // Create a date object in UTC, then adjust for JST offset
+    // If the date is "2025-12-04" in JST, midnight JST is "2025-12-03T15:00:00.000Z" in UTC
+    const year = parseInt(match[1], 10);
+    const month = parseInt(match[2], 10) - 1; // JavaScript months are 0-indexed
+    const day = parseInt(match[3], 10);
+    
+    // Create a date at midnight in JST, which is 9 hours ahead of UTC
+    // So we need to subtract 9 hours to get the equivalent UTC time
+    const date = new Date(Date.UTC(year, month, day, 0, 0, 0, 0));
+    date.setUTCHours(date.getUTCHours() - 9);
+    
+    return date.toISOString();
+};

@@ -1,5 +1,6 @@
 import { hostname } from "./envs.js";
 import type { OutputItem, Attachment } from "./types.js";
+import { dateStringJSTToUTC } from "./parseUtil.js";
 
 // フィード共通情報
 const FEED_TITLE = "筑波大学TWINS 在学生へのお知らせ";
@@ -54,11 +55,6 @@ const generateId = (item: OutputItem): string => {
     return `twins-${keijitype}-${genrecd}-${seqNo}`;
 };
 
-const toISODate = (dateStr: string): string => {
-    // dateStr is in format "YYYY-MM-DD"
-    return `${dateStr}T00:00:00Z`;
-};
-
 export const generateRSS = (items: OutputItem[]): string => { // RSS 2.0
     const lastBuildDate = new Date().toUTCString();
 
@@ -108,7 +104,7 @@ export const generateAtom = (items: OutputItem[]): string => { // Atom
             const link = escapeXml(item.url);
             const content = escapeXml(buildContent(item));
             const id = escapeXml(generateId(item));
-            const published = toISODate(item.page.date);
+            const published = dateStringJSTToUTC(item.page.date);
             const entryUpdated = item.updated;
 
             return `  <entry>

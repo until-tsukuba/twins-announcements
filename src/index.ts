@@ -9,6 +9,7 @@ import { generateUrl } from "./generateUrl.js";
 import { hostname } from "./envs.js";
 import { generateRSS, generateAtom, generateJSONFeed } from "./generateFeeds.js";
 import type { Attachment } from "./types.js";
+import { dateStringJSTToUTC } from "./parseUtil.js";
 
 const mapSeries = async <T, R>(items: readonly T[], fn: (item: T) => Promise<R>): Promise<R[]> => {
     // 並列でやるとアクセスしすぎなので
@@ -75,7 +76,7 @@ const main = async () => {
                 attachments: solvedAttachments,
             },
             url: generateUrl(page.id.keijitype, page.id.genrecd, page.id.seqNo),
-            updated: new Date().toISOString(),
+            updated: dateStringJSTToUTC(page.date),
         };
     });
 

@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { generateUrl } from "./generateUrl.js";
 import type { IndexPageItem, OutputItem } from "./types.js";
+import { dateStringJSTToUTC } from "./parseUtil.js";
 
 /**
  * 既存のoutput.jsonを読み込み、新規のお知らせのみを抽出する
@@ -32,7 +33,7 @@ export const detectNewItems = async (
             item.url = generateUrl(keijitype, genrecd, seqNo);
         }
         if (!item.updated) {
-            item.updated = new Date(item.page.date).toISOString();
+            item.updated = dateStringJSTToUTC(item.page.date);
         }
         return item;
     });
