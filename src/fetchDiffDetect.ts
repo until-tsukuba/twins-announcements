@@ -3,6 +3,11 @@ import { existsSync } from "node:fs";
 import { generateUrl } from "./generateUrl.js";
 import type { IndexPageItem, OutputItem } from "./types.js";
 
+const toISODate = (dateStr: string): string => {
+    // dateStr is in format "YYYY-MM-DD"
+    return `${dateStr}T00:00:00Z`;
+};
+
 /**
  * 既存のoutput.jsonを読み込み、新規のお知らせのみを抽出する
  * @param indexPageItems parseIndexPageで取得した一覧
@@ -32,7 +37,7 @@ export const detectNewItems = async (
             item.url = generateUrl(keijitype, genrecd, seqNo);
         }
         if (!item.updated) {
-            item.updated = new Date(item.page.date).toISOString();
+            item.updated = toISODate(item.page.date);
         }
         return item;
     });

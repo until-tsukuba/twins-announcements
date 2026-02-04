@@ -54,11 +54,6 @@ const generateId = (item: OutputItem): string => {
     return `twins-${keijitype}-${genrecd}-${seqNo}`;
 };
 
-const toISODate = (dateStr: string): string => {
-    // dateStr is in format "YYYY-MM-DD"
-    return `${dateStr}T00:00:00Z`;
-};
-
 export const generateRSS = (items: OutputItem[]): string => { // RSS 2.0
     const lastBuildDate = new Date().toUTCString();
 
@@ -108,7 +103,7 @@ export const generateAtom = (items: OutputItem[]): string => { // Atom
             const link = escapeXml(item.url);
             const content = escapeXml(buildContent(item));
             const id = escapeXml(generateId(item));
-            const published = toISODate(item.page.date);
+            const published = item.updated;
             const entryUpdated = item.updated;
 
             return `  <entry>
