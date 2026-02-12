@@ -75,6 +75,7 @@ const main = async () => {
                 attachments: solvedAttachments,
             },
             url: generateUrl(page.id.keijitype, page.id.genrecd, page.id.seqNo),
+            updated: new Date().toISOString(),
         };
     });
 

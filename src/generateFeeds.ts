@@ -54,11 +54,6 @@ const generateId = (item: OutputItem): string => {
     return `twins-${keijitype}-${genrecd}-${seqNo}`;
 };
 
-const toISODate = (dateStr: string): string => {
-    // dateStr is in format "YYYY-MM-DD"
-    return `${dateStr}T00:00:00Z`;
-};
-
 export const generateRSS = (items: OutputItem[]): string => { // RSS 2.0
     const lastBuildDate = new Date().toUTCString();
 
@@ -71,7 +66,7 @@ export const generateRSS = (items: OutputItem[]): string => { // RSS 2.0
             const link = escapeXml(item.url);
             const description = escapeXml(buildContent(item));
             const guid = escapeXml(generateId(item));
-            const pubDate = new Date(item.page.date).toUTCString();
+            const pubDate = new Date(item.updated).toUTCString();
 
             return `    <item>
       <title>${title}</title>
@@ -108,15 +103,15 @@ export const generateAtom = (items: OutputItem[]): string => { // Atom
             const link = escapeXml(item.url);
             const content = escapeXml(buildContent(item));
             const id = escapeXml(generateId(item));
-            const published = toISODate(item.page.date);
-            const updatedDate = toISODate(item.page.date);
+            const published = item.updated;
+            const entryUpdated = item.updated;
 
             return `  <entry>
     <title>${title}</title>
     <link href="${link}" />
     <id>${id}</id>
     <published>${published}</published>
-    <updated>${updatedDate}</updated>
+    <updated>${entryUpdated}</updated>
     <content type="text">${content}</content>
   </entry>`;
         })
@@ -148,7 +143,7 @@ export const generateJSONFeed = (items: OutputItem[]): string => { // JSON feed
             url: item.url,
             title: item.page.title,
             content_text: buildContent(item),
-            date_published: toISODate(item.page.date),
+            date_published: item.updated,
         })),
     };
 
